@@ -2,41 +2,60 @@
 import argparse
 import unittest
 
+
 # Assume we can hard code the graph.
-# Would probably store it in something else if it is expected to change.
-TOWN_GRAPH = {
-    "A": {
-        "B": 5,
-        "D": 5,
-        "E": 7
-    },
-    "B": {
-        "C": 4
-    },
-    "C": {
-        "D": 8,
-        "E": 2
-    },
-    "D": {
-        "C": 8,
-        "E": 6
-    },
-    "E": {
-        "B": 3
+# Would probably store it in something else if it is expected to change often.
+class TownGraph:
+    graph = {
+        "A": {
+            "B": 5,
+            "D": 5,
+            "E": 7
+        },
+        "B": {
+            "C": 4
+        },
+        "C": {
+            "D": 8,
+            "E": 2
+        },
+        "D": {
+            "C": 8,
+            "E": 6
+        },
+        "E": {
+            "B": 3
+        }
     }
-}
 
+    @classmethod
+    def has_connection(cls, town_a: str, town_b: str) -> bool:
+        """
+        Checks if a connection exists from town_a to town_b
+        """
+        if town_b in cls.graph[town_a]:
+            return True
+        else:
+            return False
 
-def edge_distance(town_a: str, town_b: str) -> int:
-    """
-    Calculates the distance between to towns.
-    Is directional and can be different (or non-existent) when swapped.
+    @classmethod
+    def available_connections(cls, town: str) -> list[str]:
+        """
+        Returns all available connections from a town.
+        """
+        return list(cls.graph[town].keys())
+    
+    @classmethod
+    def edge_distance(cls, town_a: str, town_b: str) -> int:
+        """
+        Calculates the distance between to towns.
+        Is directional and can be different (or non-existent) when swapped.
 
-    Will throw a ValueError if the route between town_a and town_b does not exist.
-    """
-    if town_b not in TOWN_GRAPH[town_a]:
-        raise ValueError("NO SUCH ROUTE")
-    return TOWN_GRAPH[town_a][town_b]
+        Will throw a ValueError if the route between town_a and town_b does not exist.
+        """
+        if not cls.has_connection(town_a, town_b):
+            raise ValueError("NO SUCH ROUTE")
+        return cls.graph[town_a][town_b]
 
 
 def route_distance(route: list) -> int:
@@ -51,7 +70,7 @@ def route_distance(route: list) -> int:
     for i in range(len(route)-1):
         current_stop = route[i]
         next_stop = route[i + 1]
-        distance += edge_distance(current_stop, next_stop)
+        distance += TownGraph.edge_distance(current_stop, next_stop)
 
     return distance
 
