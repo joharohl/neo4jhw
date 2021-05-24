@@ -2,6 +2,8 @@
 import argparse
 import unittest
 
+from typing import List
+
 
 # Assume we can hard code the graph.
 # Would probably store it in something else if it is expected to change often.
@@ -39,7 +41,7 @@ class TownGraph:
             return False
 
     @classmethod
-    def available_connections(cls, town: str) -> list[str]:
+    def available_connections(cls, town: str) -> List[str]:
         """
         Returns all available connections from a town.
         """
@@ -58,11 +60,11 @@ class TownGraph:
         return cls.graph[town_a][town_b]
 
 
-def route_distance(route: list) -> int:
+def route_distance(route: List[str]) -> int:
     """
     Calculates the distance for a route between a number of towns.
 
-    :param route: Towns that should be visited,
+    :param route: List of towns as strings that should be visited,
     :return: length of route, will be 0 for an empty list and just a single town.
     """
 
@@ -75,29 +77,29 @@ def route_distance(route: list) -> int:
     return distance
 
 
-def get_routes(start_town: str, end_town: str, max_stops=1000, min_stops=0) -> [[str]]:
+def get_routes(start_town: str, end_town: str, max_stops=1000, min_stops=0) -> List[List[str]]:
     """
     Finds all routes between start_town and end_town that satisfies the max_stops and min_stops limits.
 
     :return: List of found trips which in turn is a list of strings.
     """
-    possible_trips: [[str]] = [[start_town]]
-    routes = []
+    possible_routes: List[List[str]] = [[start_town]]
+    found_routes = []
 
-    while len(possible_trips) > 0:
-        trip = possible_trips.pop()
-        trip_length = len(trip)
+    while len(possible_routes) > 0:
+        route = possible_routes.pop()
+        route_length = len(route)
 
-        if trip_length <= max_stops:
-            for town in TownGraph.available_connections(trip[-1]):
-                if town == end_town and trip_length >= min_stops:
-                    routes.append(trip + [end_town])
+        if route_length <= max_stops:
+            for town in TownGraph.available_connections(route[-1]):
+                if town == end_town and route_length >= min_stops:
+                    found_routes.append(route + [end_town])
                 else:
-                    possible_trips.append(trip + [town])
-    return routes
+                    possible_routes.append(route + [town])
+    return found_routes
 
 
-def handle_route_command(args):
+def handle_route_distance_command(args):
     try:
         print(route_distance(args.towns))
     except ValueError as e:
@@ -120,7 +122,7 @@ if __name__ == '__main__':
 
     parser_route_distance = subparsers.add_parser('route_distance', help='Get distance of a route')
     parser_route_distance.add_argument("towns", type=str, nargs="+", help="Towns to visit")
-    parser_route_distance.set_defaults(func=handle_route_command)
+    parser_route_distance.set_defaults(func=handle_route_distance_command)
 
     parser_get_routes = subparsers.add_parser('get_routes', help='Get available routes between two towns.')
     parser_get_routes.add_argument("start_town", type=str, help="Town where the trip starts.")
