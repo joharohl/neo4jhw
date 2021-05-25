@@ -77,6 +77,30 @@ def route_distance(route: List[str]) -> int:
     return distance
 
 
+def find_shortest_route(town_a: str, town_b: str) -> List[str]:
+    shortest_route = []
+    possible_routes: List[List[str]] = [[town_a]]
+
+    while len(possible_routes) > 0:
+        route = possible_routes.pop()
+
+        for town in TownGraph.available_connections(route[-1]):
+            candidate_route = route + [town]
+
+            if town == town_b:
+                if len(shortest_route) == 0:
+                    shortest_route = candidate_route
+                elif route_distance(candidate_route) < route_distance(shortest_route):
+                    shortest_route = candidate_route
+            else:
+                if len(shortest_route) == 0:
+                    possible_routes.append(candidate_route)
+                elif route_distance(candidate_route) < route_distance(shortest_route):
+                    possible_routes.append(candidate_route)
+
+    return shortest_route
+
+
 def get_routes(start_town: str, end_town: str, max_stops=1000, min_stops=0) -> List[List[str]]:
     """
     Finds all routes between start_town and end_town that satisfies the max_stops and min_stops limits.
@@ -116,6 +140,14 @@ def handle_get_routes_command(args):
         print(e)
 
 
+def handle_find_shortest_route_command(args):
+    try:
+        route = find_shortest_route(args.start_town, args.end_town)
+        print(f"Found shortest route {route} with distance {route_distance(route)}.")
+    except ValueError as e:
+        print(e)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title='subcommands', help='')
@@ -130,6 +162,11 @@ if __name__ == '__main__':
     parser_get_routes.add_argument("--max-stops", type=int, default=1000, help="Maximum stops to visit")
     parser_get_routes.add_argument("--min-stops", type=int, default=1, help="Minimum stops to visit")
     parser_get_routes.set_defaults(func=handle_get_routes_command)
+
+    parser_find_shortest_route = subparsers.add_parser('find_shortest_route', help='Find shortest route between two towns.')
+    parser_find_shortest_route.add_argument("start_town", type=str, help="Town where the trip starts.")
+    parser_find_shortest_route.add_argument("end_town", type=str, help="Town where the trip ends.")
+    parser_find_shortest_route.set_defaults(func=handle_find_shortest_route_command)
 
     args = parser.parse_args()
     args.func(args)
@@ -164,3 +201,9 @@ class HWTests(unittest.TestCase):
             ['A', 'D', 'C', 'D', 'C'],
             ['A', 'B', 'C', 'D', 'C']
         ])
+
+    def test_case_8(self):
+        self.assertEqual(route_distance(find_shortest_route('A', 'C')), 9)
+
+    def test_case_9(self):
+        self.assertEqual(route_distance(find_shortest_route('B', 'B')), 9)
