@@ -9,24 +9,24 @@ from typing import List
 # Would probably store it in something else if it is expected to change often.
 class TownGraph:
     graph = {
-        "A": {
-            "B": 5,
-            "D": 5,
-            "E": 7
+        'A': {
+            'B': 5,
+            'D': 5,
+            'E': 7
         },
-        "B": {
-            "C": 4
+        'B': {
+            'C': 4
         },
-        "C": {
-            "D": 8,
-            "E": 2
+        'C': {
+            'D': 8,
+            'E': 2
         },
-        "D": {
-            "C": 8,
-            "E": 6
+        'D': {
+            'C': 8,
+            'E': 6
         },
-        "E": {
-            "B": 3
+        'E': {
+            'B': 3
         }
     }
 
@@ -78,6 +78,11 @@ def route_distance(route: List[str]) -> int:
 
 
 def find_shortest_route(town_a: str, town_b: str) -> List[str]:
+    """
+    Finds the shortest route between town_a and town_b
+    
+    :return: A list of strings representing the shortest route.
+    """
     shortest_route = []
     possible_routes: List[List[str]] = [[town_a]]
 
@@ -133,9 +138,9 @@ def handle_route_distance_command(args):
 def handle_get_routes_command(args):
     try:
         routes = get_routes(args.start_town, args.end_town, args.max_stops, args.min_stops)
-        print(f"Found {len(routes)} routes:")
+        print(f'Found {len(routes)} routes:')
         for route in sorted(routes, key=lambda x: len(x)):
-            print("    " + "->".join(route))
+            print('    ' + '->'.join(route))
     except ValueError as e:
         print(e)
 
@@ -143,7 +148,7 @@ def handle_get_routes_command(args):
 def handle_find_shortest_route_command(args):
     try:
         route = find_shortest_route(args.start_town, args.end_town)
-        print(f"Found shortest route {route} with distance {route_distance(route)}.")
+        print(f'Found shortest route {route} with distance {route_distance(route)}.')
     except ValueError as e:
         print(e)
 
@@ -152,20 +157,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title='subcommands', help='')
 
+    parser_get_towns = subparsers.add_parser('get_towns', help='Get towns to travel between')
+    parser_get_towns.set_defaults(func=lambda args: print(" ".join(TownGraph.graph.keys())))
+
     parser_route_distance = subparsers.add_parser('route_distance', help='Get distance of a route')
-    parser_route_distance.add_argument("towns", type=str, nargs="+", help="Towns to visit")
+    parser_route_distance.add_argument('towns', type=str, nargs='+', help='Towns to visit')
     parser_route_distance.set_defaults(func=handle_route_distance_command)
 
     parser_get_routes = subparsers.add_parser('get_routes', help='Get available routes between two towns.')
-    parser_get_routes.add_argument("start_town", type=str, help="Town where the trip starts.")
-    parser_get_routes.add_argument("end_town", type=str, help="Town where the trip ends.")
-    parser_get_routes.add_argument("--max-stops", type=int, default=1000, help="Maximum stops to visit")
-    parser_get_routes.add_argument("--min-stops", type=int, default=1, help="Minimum stops to visit")
+    parser_get_routes.add_argument('start_town', type=str, help='Town where the trip starts.')
+    parser_get_routes.add_argument('end_town', type=str, help='Town where the trip ends.')
+    parser_get_routes.add_argument('--max-stops', type=int, default=1000, help='Maximum stops to visit')
+    parser_get_routes.add_argument('--min-stops', type=int, default=1, help='Minimum stops to visit')
     parser_get_routes.set_defaults(func=handle_get_routes_command)
 
     parser_find_shortest_route = subparsers.add_parser('find_shortest_route', help='Find shortest route between two towns.')
-    parser_find_shortest_route.add_argument("start_town", type=str, help="Town where the trip starts.")
-    parser_find_shortest_route.add_argument("end_town", type=str, help="Town where the trip ends.")
+    parser_find_shortest_route.add_argument('start_town', type=str, help='Town where the trip starts.')
+    parser_find_shortest_route.add_argument('end_town', type=str, help='Town where the trip ends.')
     parser_find_shortest_route.set_defaults(func=handle_find_shortest_route_command)
 
     args = parser.parse_args()
@@ -174,29 +182,29 @@ if __name__ == '__main__':
 
 class HWTests(unittest.TestCase):
     def test_case_1(self):
-        self.assertEqual(route_distance(["A", "B", "C"]), 9)
+        self.assertEqual(route_distance(['A', 'B', 'C']), 9)
 
     def test_case_2(self):
-        self.assertEqual(route_distance(["A", "D"]), 5)
+        self.assertEqual(route_distance(['A', 'D']), 5)
 
     def test_case_3(self):
-        self.assertEqual(route_distance(["A", "D", "C"]), 13)
+        self.assertEqual(route_distance(['A', 'D', 'C']), 13)
 
     def test_case_4(self):
-        self.assertEqual(route_distance(["A", "E", "B", "C", "D"]), 22)
+        self.assertEqual(route_distance(['A', 'E', 'B', 'C', 'D']), 22)
 
     def test_case_5(self):
-        with self.assertRaises(ValueError, msg="NO SUCH ROUTE"):
-            route_distance(["A", "E", "D"])
+        with self.assertRaises(ValueError, msg='NO SUCH ROUTE'):
+            route_distance(['A', 'E', 'D'])
 
     def test_case_6(self):
-        self.assertEqual(get_routes("C", "C", max_stops=3), [
+        self.assertEqual(get_routes('C', 'C', max_stops=3), [
             ['C', 'E', 'B', 'C'],
             ['C', 'D', 'C']
         ])
 
     def test_case_7(self):
-        self.assertEqual(get_routes("A", "C", max_stops=4, min_stops=4), [
+        self.assertEqual(get_routes('A', 'C', max_stops=4, min_stops=4), [
             ['A', 'D', 'E', 'B', 'C'],
             ['A', 'D', 'C', 'D', 'C'],
             ['A', 'B', 'C', 'D', 'C']
